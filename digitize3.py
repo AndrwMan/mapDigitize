@@ -2,7 +2,9 @@ import cv2
 import numpy as np
 
 # Load the image using OpenCV
-image_path = './imgs/raw/indonesia1.1.jpg'
+#image_path = './imgs/raw/indonesia1.1.jpg'
+#image_path = './imgs/raw/JPEG 2000.jp2'
+image_path = 'imgs/raw/Medium sized JPEG.jpg'
 image = cv2.imread(image_path)
 
 # Convert the image to grayscale
@@ -37,4 +39,4 @@ mask_red = cv2.inRange(hsv, lower_red, upper_red)
 red_pixels = cv2.bitwise_and(map_area, map_area, mask=mask_red)
 
 # Save the isolated red pixels
-cv2.imwrite('./imgs/digitized/indonesia_red_pixels.jpg', red_pixels)
+cv2.imwrite('./imgs/digitized/indonesia_red_pixels2.jpg', red_pixels)
