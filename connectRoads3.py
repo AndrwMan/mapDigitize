@@ -23,44 +23,44 @@ else:
     red_mask = cv2.bitwise_or(mask1, mask2)
     
     # Save the red mask
-    cv2.imwrite('./imgs/digitized/intermediate_red_mask4.jpg', red_mask)
+    cv2.imwrite('./imgs/digitized/intermediate_red_mask4c.jpg', red_mask)
 
     # Extract the red elements using the mask
     red_elements = cv2.bitwise_and(image, image, mask=red_mask)
     
     # Save the extracted red elements
-    cv2.imwrite('./imgs/digitized/intermediate_red_elements4.jpg', red_elements)
+    cv2.imwrite('./imgs/digitized/intermediate_red_elements4c.jpg', red_elements)
 
     # Convert the red elements to grayscale
     red_elements_gray = cv2.cvtColor(red_elements, cv2.COLOR_BGR2GRAY)
     
     # Save the grayscale red elements
-    cv2.imwrite('./imgs/digitized/intermediate_red_elements_gray4.jpg', red_elements_gray)
+    cv2.imwrite('./imgs/digitized/intermediate_red_elements_gray4c.jpg', red_elements_gray)
 
     # Apply morphological operations to connect the dotted lines
-    kernel = np.ones((5, 5), np.uint8)
+    kernel = np.ones((10, 10), np.uint8)
     closed_red_elements = cv2.morphologyEx(red_elements_gray, cv2.MORPH_CLOSE, kernel, iterations=5)
     
     # Save the closed red elements
-    cv2.imwrite('./imgs/digitized/intermediate_closed_red_elements4.jpg', closed_red_elements)
+    cv2.imwrite('./imgs/digitized/intermediate_closed_red_elements4c.jpg', closed_red_elements)
 
     # Create a mask from the closed red elements
     _, red_mask_closed = cv2.threshold(closed_red_elements, 1, 255, cv2.THRESH_BINARY)
     
     # Save the mask from closed red elements
-    cv2.imwrite('./imgs/digitized/intermediate_red_mask_closed4.jpg', red_mask_closed)
+    cv2.imwrite('./imgs/digitized/intermediate_red_mask_closed4c.jpg', red_mask_closed)
 
     # Convert the closed red elements back to BGR format
     closed_red_elements_bgr = cv2.bitwise_and(image, image, mask=red_mask_closed)
     
     # Save the closed red elements in BGR format
-    cv2.imwrite('./imgs/digitized/intermediate_closed_red_elements_bgr4.jpg', closed_red_elements_bgr)
+    cv2.imwrite('./imgs/digitized/intermediate_closed_red_elements_bgr4c.jpg', closed_red_elements_bgr)
 
     # Combine the closed red elements with the original red elements
     final_red_elements = cv2.addWeighted(red_elements, 0.5, closed_red_elements_bgr, 0.5, 0)
     
     # Save the final result
-    cv2.imwrite('./imgs/digitized/connected_red_elements4.jpg', final_red_elements)
+    cv2.imwrite('./imgs/digitized/connected_red_elements4c.jpg', final_red_elements)
 
     print("Red dotted lines connected and saved.")
 
