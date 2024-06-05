@@ -1,62 +1,69 @@
 import cv2
 import numpy as np
+import os
 
-# Load the image using OpenCV
-image_path = './imgs/raw/JPEG 2000.jp2'  # Ensure this path is correct and the image is in a readable format
-image = cv2.imread(image_path, cv2.IMREAD_COLOR)  # Ensure that the image is being read correctly
+# Define the input and output directories
+input_dir = './imgs/raw/'
+output_dir = './imgs/cropped/'
 
-if image is None:
-    print("Image not loaded, check the file format and path.")
-else:
+# Ensure the output directory exists
+os.makedirs(output_dir, exist_ok=True)
+
+# List all files in the input directory
+image_files = [f for f in os.listdir(input_dir) if f.endswith('.jp2')]
+
+for image_file in image_files:
+    image_path = os.path.join(input_dir, image_file)
+    image = cv2.imread(image_path, cv2.IMREAD_COLOR)
+
+    if image is None:
+        print(f"Image {image_file} not loaded, check the file format and path.")
+        continue
+    
     # Convert the image to grayscale for processing
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     # Apply Gaussian blur to smooth the image, reducing noise and detail
     blurred = cv2.GaussianBlur(gray, (9, 9), 0)
 
-    # Detect edges using Canny
-    edges = cv2.Canny(blurred, 50, 150, apertureSize=3)
+    # Use adaptive thresholding
+    thresholded = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+                                        cv2.THRESH_BINARY_INV, 11, 2)
 
     # Use morphological operations to close small gaps in contours
     kernel = np.ones((5, 5), np.uint8)
-    edges = cv2.dilate(edges, kernel, iterations=1)
+    edges = cv2.dilate(thresholded, kernel, iterations=1)
     edges = cv2.erode(edges, kernel, iterations=1)
-    cv2.imwrite('./imgs/digitized/edges_processed9.jpg', edges)  # Save the processed edges image for review
+    edge_output_path = os.path.join(output_dir, f'edges_{os.path.splitext(image_file)[0]}.jpg')
+    cv2.imwrite(edge_output_path, edges)
 
-    # Find contours from the edged image
+    # Find contours from the thresholded image
     contours, hierarchy = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     # Filter contours based on aspect ratio and area
     def is_rectangular(contour):
         x, y, w, h = cv2.boundingRect(contour)
         aspect_ratio = float(w) / h
-        return 0.75 < aspect_ratio < 1.25  # Assuming the map is roughly square
+        return 0.5 < aspect_ratio < 2  # Adjust aspect ratio according to your map's shape
 
-    contours = [cnt for cnt in contours if is_rectangular(cnt)]
+    contours = [cnt for cnt in contours if is_rectangular(cnt) and cv2.contourArea(cnt) > 1000]  # Adjust area threshold
     largest_contour = max(contours, key=cv2.contourArea) if contours else None
 
     if largest_contour is not None and len(largest_contour) > 0:
         # Draw the contours on an image for visualization
         contour_image = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
         cv2.drawContours(contour_image, [largest_contour], -1, (0, 255, 0), 3)
-        cv2.imwrite('./imgs/digitized/largest_contour_filtered9.jpg', contour_image)  # Save the largest contour image for review
-
-        # Create a mask for the largest contour
-        mask = np.zeros_like(gray)
-        cv2.drawContours(mask, [largest_contour], -1, 255, thickness=cv2.FILLED)
-
-        # Create a bitwise and of the color image and mask to isolate the map in color
-        color_mask = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
-        map_isolated_color = cv2.bitwise_and(image, color_mask)
-        cv2.imwrite('./imgs/digitized/map_isolated_color9.jpg', map_isolated_color)  # Save the isolated color map for review
+        contour_output_path = os.path.join(output_dir, f'largest_contour_{os.path.splitext(image_file)[0]}.jpg')
+        cv2.imwrite(contour_output_path, contour_image)
 
         # Get the bounding box of the largest contour
         x, y, w, h = cv2.boundingRect(largest_contour)
         
         # Crop the isolated map to the bounding box
-        cropped_map_color = map_isolated_color[y:y+h, x:x+w]
-        cv2.imwrite('./imgs/digitized/cropped_map_color.jpg', cropped_map_color)  # Save the cropped color map image for review
+        cropped_map_color = image[y:y+h, x:x+w]
+        cropped_output_path = os.path.join(output_dir, f'cropped_map_{os.path.splitext(image_file)[0]}.jpg')
+        cv2.imwrite(cropped_output_path, cropped_map_color)
 
-        print("Map area isolated, cropped, and saved in color.")
+        print(f"Processed {image_file}: Map area isolated, cropped, and saved in color.")
     else:
-        print("No suitable contours found, adjust the filtering criteria.")
+        print(f"No suitable contours found in {image_file}, adjust the filtering criteria.")

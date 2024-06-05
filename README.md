@@ -5,7 +5,7 @@ Here is an example image
 
 This project begins by automating processes that previously would have been done manually in tools like Adobe Lightroom. This includes cropping the map image from entire image (excluding legend elements) and converting image to grayscale. 
 
-### digitize.py
+### digitize_dset1.py
 For all python files all one has to do is to change `image_path` to desired image to be process and run the file. After the first `image_path` is specified, often the next path to specify is just the output of the last .py file.
 
 <!-- ![ex. img from dataset 1](imgs/digitized/indonesia_map_extracted.jpg)
@@ -24,7 +24,7 @@ A new dataset was found that had roads that were distinctly red.
 Here is an example image
 ![ex. img from dataset 2](imgs/raw/Medium%20sized%20JPEG.jpg)
 
-### digitize2.py
+### digitize_dset2.py
 Running the unmodified code on new inputs yield completely black images as output. By examining intermediate results, it turns out the lack of a border and the thickness of grids in the new dataset images seem to cause breaks in the contours which means the program does not "see" the map image as a single element. Code had to rewritten to automatically crop map images for the new dataset.
 
 ```python
@@ -54,13 +54,13 @@ The code has relied on identifying the largest element as the map image, and thi
 Now, repeat the same preprocessing steps as in dataset 1
 ![ex. img from dataset 2](imgs/digitized/map_isolated_color9.jpg)
 
-### isolateRoads.py
+### isolateRoads_dset2.py
 ![ex. img from dataset 2](imgs/digitized/cropped_map.jpg)
 ![ex. img from dataset 2](imgs/digitized/connected_red_elements4.jpg)
 
 Arriving back at the same point as last data set with isolated red elements. It is much clearer where the roads are.
 
-### connectRoads.py
+### connectRoads_dset2.py
 Now for dotted lines, connect the segments since in reality these are of course roads without gaps. One approach for closing is to dilate the elements and erode the elements back to thin lines. 
 
 ![ex. img from dataset 2](imgs/digitized/connected_red_elements4.jpg)
