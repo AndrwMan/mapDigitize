@@ -1,13 +1,25 @@
 import cv2
 import numpy as np
+import os
 
-# Load the cropped color image using OpenCV
-cropped_image_path = './imgs/digitized/cropped_map_color.jpg'  # Ensure this path is correct and the image is in a readable format
-image = cv2.imread(cropped_image_path, cv2.IMREAD_COLOR)  # Ensure that the image is being read correctly
+# Define the input and output directories
+input_dir = './imgs/cropped/'
+output_dir = './imgs/isolated/'
 
-if image is None:
-    print("Image not loaded, check the file format and path.")
-else:
+# Ensure the output directory exists
+os.makedirs(output_dir, exist_ok=True)
+
+# List all image files in the input directory
+image_files = [f for f in os.listdir(input_dir) if f.lower().endswith(('.jpg', '.jpeg', '.png', '.tif', '.tiff', '.bmp', '.jp2'))]
+
+for image_file in image_files:
+    image_path = os.path.join(input_dir, image_file)
+    image = cv2.imread(image_path, cv2.IMREAD_COLOR)  # Ensure that the image is being read correctly
+
+    if image is None:
+        print(f"Image {image_file} not loaded, check the file format and path.")
+        continue
+    
     # Convert the image to the HSV color space
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
@@ -24,6 +36,7 @@ else:
 
     # Use the mask to extract the red elements
     red_elements = cv2.bitwise_and(image, image, mask=red_mask)
-    cv2.imwrite('./imgs/digitized/red_elements.jpg', red_elements)  # Save the isolated red elements image for review
+    output_path = os.path.join(output_dir, f'red_elements_{os.path.splitext(image_file)[0]}.jpg')
+    cv2.imwrite(output_path, red_elements)  # Save the isolated red elements image for review
 
-    print("Red elements isolated and saved.")
+    print(f"Processed {image_file}: Red elements isolated and saved to {output_path}.")

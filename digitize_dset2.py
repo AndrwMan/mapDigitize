@@ -44,7 +44,7 @@ for image_file in image_files:
     edges = cv2.dilate(thresholded, kernel, iterations=1)
     edges = cv2.erode(edges, kernel, iterations=1)
     edge_output_path = os.path.join(output_dir, f'edges_{os.path.splitext(image_file)[0]}.jpg')
-    cv2.imwrite(edge_output_path, edges)
+    #cv2.imwrite(edge_output_path, edges)
 
     # Find contours from the thresholded image
     contours, hierarchy = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -63,7 +63,7 @@ for image_file in image_files:
         contour_image = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
         cv2.drawContours(contour_image, [largest_contour], -1, (0, 255, 0), 3)
         contour_output_path = os.path.join(output_dir, f'largest_contour_{os.path.splitext(image_file)[0]}.jpg')
-        cv2.imwrite(contour_output_path, contour_image)
+        #cv2.imwrite(contour_output_path, contour_image)
 
         # Get the bounding box of the largest contour
         x, y, w, h = cv2.boundingRect(largest_contour)
