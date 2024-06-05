@@ -9,8 +9,17 @@ output_dir = './imgs/cropped/'
 # Ensure the output directory exists
 os.makedirs(output_dir, exist_ok=True)
 
+# Supported image file extensions
+supported_extensions = ('.jpg', '.jpeg', '.png', '.jp2')
+
 # List all files in the input directory
-image_files = [f for f in os.listdir(input_dir) if f.endswith('.jp2')]
+all_files = os.listdir(input_dir)
+image_files = [f for f in all_files if f.lower().endswith(supported_extensions)]
+unsupported_files = [f for f in all_files if not f.lower().endswith(supported_extensions)]
+
+# Print message for unsupported files
+for file in unsupported_files:
+    print(f"{file} is not supported")
 
 for image_file in image_files:
     image_path = os.path.join(input_dir, image_file)
